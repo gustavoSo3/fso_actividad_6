@@ -4,8 +4,8 @@
 #include <math.h>
 #include <sys/time.h>
 #include <pthread.h>
-
-#define ITERS 1000000000
+//#define ITERS 1000000000
+#define ITERS 5000
 #define N_THREADS 4
 
 pthread_mutex_t mutex;
@@ -17,6 +17,8 @@ struct log_args
 	int start;
 	int end;
 };
+
+struct log_args t_args[N_THREADS];
 
 void *paralelized_log(void *args);
 
@@ -36,11 +38,10 @@ int main()
 	pthread_mutex_init(&mutex, NULL);
 	for (int t = 0; t < N_THREADS; ++t)
 	{
-		struct log_args p;
-		p.x = x;
-		p.start = (ITERS / N_THREADS * t) + 1;
-		p.end = (ITERS / N_THREADS * (t + 1)) + 1;
-		pthread_create(&tid[t], NULL, paralelized_log, &p);
+		t_args[t].x = x;
+		t_args[t].start = (ITERS / N_THREADS * t) + 1;
+		t_args[t].end = (ITERS / N_THREADS * (t + 1));
+		pthread_create(&tid[t], NULL, paralelized_log, &t_args[t]);
 	}
 	for (int t = 0; t < N_THREADS; ++t)
 	{
@@ -59,13 +60,17 @@ void *paralelized_log(void *args)
 {
 	struct log_args cast_args = *((struct log_args *)args);
 	double local_sum = 0.0;
+	int n;
 
-	for (int n = cast_args.start; n < cast_args.end; n++)
+	for (n = cast_args.start; n < cast_args.end; n++)
 	{
-		double power = pow(-1, n + 1) * pow(cast_args.x, n) / n; // Separar cálculo para hacer paralelización
-		local_sum += power;
+		double power = (pow(-1, n + 1) * pow(cast_args.x, n) / n);
+		printf("%f",power);
+		if(!isnan(power) && !isinf(power))
+			local_sum = local_sum + power;
+		
 	}
 	pthread_mutex_lock(&mutex);
-	sum += local_sum;
+	sum = sum + local_sum;
 	pthread_mutex_unlock(&mutex);
 }
