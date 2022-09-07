@@ -13,7 +13,8 @@
 
 int mat[SIZE][SIZE];
 
-struct pair {
+struct pair
+{
     int start;
     int end;
 };
@@ -26,11 +27,11 @@ int isprime(int n);
 
 void *process_section(void *args);
 
-int main() {
+int main()
+{
     clock_t start_ts, stop_ts;
     double elapsed_time;
     pthread_t tid[N_THREADS];
-
 
     // Inicializa la matriz con números al azar
     initmat(mat);
@@ -39,13 +40,15 @@ int main() {
 
     // Eliminar de la matriz todos los números que no son primos
     // Esta es la parte que hay que paralelizar
-    for (int t = 0; t < N_THREADS; ++t) {
+    for (int t = 0; t < N_THREADS; ++t)
+    {
         struct pair p;
         p.start = SIZE / N_THREADS * t;
         p.end = SIZE / N_THREADS * (t + 1);
         pthread_create(&tid[t], NULL, process_section, &p);
     }
-    for (int t = 0; t < N_THREADS; ++t) {
+    for (int t = 0; t < N_THREADS; ++t)
+    {
         pthread_join(tid[t], NULL);
     }
 
@@ -53,21 +56,22 @@ int main() {
     stop_ts = clock(); // Tiempo final
     elapsed_time = stop_ts - start_ts;
 
-
-    //printnonzeroes(mat);
+    // printnonzeroes(mat);
     printf("------------------------------\n");
     printf("TIEMPO TOTAL, %f segundos\n", elapsed_time / 1000);
 }
 
-void *process_section(void *args) {
-    struct pair p = *((struct pair *) args);
+void *process_section(void *args)
+{
+    struct pair p = *((struct pair *)args);
     for (int i = p.start; i < p.end; i++)
         for (int j = p.start; j < p.end; j++)
             if (!isprime(mat[i][j]))
                 mat[i][j] = 0;
 }
 
-void initmat(int matrix[][SIZE]) {
+void initmat(int matrix[][SIZE])
+{
     int i, j;
 
     srand(getpid());
@@ -77,7 +81,8 @@ void initmat(int matrix[][SIZE]) {
             matrix[i][j] = INICIAL + rand() % (FINAL - INICIAL);
 }
 
-void printnonzeroes(int matrix[SIZE][SIZE]) {
+void printnonzeroes(int matrix[SIZE][SIZE])
+{
     int i, j;
 
     for (i = 0; i < SIZE; i++)
@@ -86,8 +91,8 @@ void printnonzeroes(int matrix[SIZE][SIZE]) {
                 printf("%d\n", matrix[i][j]);
 }
 
-
-int isprime(int n) {
+int isprime(int n)
+{
     int d = 3;
     int prime = 0;
     int limit = sqrt(n);
@@ -96,7 +101,8 @@ int isprime(int n) {
         prime = 0;
     else if (n == 2)
         prime = 1;
-    else {
+    else
+    {
         while (d <= limit && n % d)
             d += 2;
         prime = d > limit;
